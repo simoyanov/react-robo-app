@@ -85,3 +85,15 @@ app.put("/api/records/:id", (req, res) => {
     }
   });
 });
+
+app.delete("/api/records/:id", (req, res) => {
+  const id = req.params.id;
+  db.run("DELETE FROM records WHERE id = ?", id, (err) => {
+    if (err) {
+      console.error("Ошибка при удалении записи:", err.message);
+      res.status(500).json({ error: "Ошибка на сервере" });
+      return;
+    }
+    res.json({ message: "Запись успешно удалена" });
+  });
+});
