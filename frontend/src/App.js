@@ -1,33 +1,33 @@
-// frontend/src/App.js
+import React from "react";
+import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import CreateRecord from "./components/CreateRecord";
+import EditRecord from "./components/EditRecord";
+import RecordList from "./components/RecordList";
 
 function App() {
-  const [records, setRecords] = useState([]);
-
-  useEffect(() => {
-    axios
-      .get("/api/records") // Это URL, который будет проксирован к серверу Express
-      .then((response) => {
-        setRecords(response.data);
-      })
-      .catch((error) => {
-        console.error("Ошибка при получении данных:", error);
-      });
-  }, []);
-
   return (
-    <div className="App">
-      <h1>Список записей</h1>
-      <ul>
-        {records.map((record) => (
-          <li key={record.id}>
-            {record.name} - {record.email}
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Router>
+      <div className="App">
+        <h1>Мое приложение</h1>
+        <nav>
+          <ul>
+            <li>
+              <Link to="/">Список записей</Link>
+            </li>
+            <li>
+              <Link to="/create">Создать запись</Link>
+            </li>
+          </ul>
+        </nav>
+
+        <Routes>
+          <Route path="/create" element={<CreateRecord />} />
+          <Route path="/edit/:id" element={<EditRecord />} />
+          <Route path="/" element={<RecordList />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
