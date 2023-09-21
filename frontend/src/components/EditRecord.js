@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import UpdateSuccessModal from "./UpdateSuccessModal"; // Импорт компонента UpdateSuccessModal
 
 function EditRecord() {
   const { id } = useParams();
   const [record, setRecord] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
@@ -31,7 +33,9 @@ function EditRecord() {
     axios
       .put(`/api/records/${id}`, record)
       .then((response) => {
+        // setSuccessMessage("Запись успешно обновлена.");
         setSuccessMessage("Запись успешно обновлена.");
+        setSuccessModalVisible(true);
         setErrorMessage("");
       })
       .catch((error) => {
@@ -44,9 +48,9 @@ function EditRecord() {
   return (
     <div>
       <h2>Редактирование записи</h2>
-      {successMessage && (
+      {/* {successMessage && (
         <div className="success-message">{successMessage}</div>
-      )}
+      )} */}
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       <form>
         <div>
@@ -103,6 +107,12 @@ function EditRecord() {
           Сохранить изменения
         </button>
       </form>
+      {successModalVisible && (
+        <UpdateSuccessModal
+          message={successMessage}
+          onClose={() => setSuccessModalVisible(false)}
+        />
+      )}
     </div>
   );
 }

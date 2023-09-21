@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import SuccessModal from "./SuccessModal";
 import { Link } from "react-router-dom";
 
 function CreateRecord() {
@@ -11,8 +12,14 @@ function CreateRecord() {
     state: "",
   });
 
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  const showSuccessModal = (message) => {
+    setSuccessMessage(message);
+    setSuccessModalVisible(true);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -27,7 +34,8 @@ function CreateRecord() {
     axios
       .post("/api/records", formData)
       .then((response) => {
-        setSuccessMessage("Запись успешно создана.");
+        // setSuccessMessage("Запись успешно создана.");
+        showSuccessModal("Запись успешно создана.");
         setErrorMessage("");
         setFormData({
           name: "",
@@ -46,9 +54,9 @@ function CreateRecord() {
   return (
     <div>
       <h2>Создание записи</h2>
-      {successMessage && (
+      {/* {successMessage && (
         <div className="success-message">{successMessage}</div>
-      )}
+      )} */}
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       <form onSubmit={handleSubmit}>
         <div>
@@ -103,6 +111,12 @@ function CreateRecord() {
         </div>
         <button type="submit">Создать запись</button>
       </form>
+      {successModalVisible && (
+        <SuccessModal
+          message={successMessage}
+          onClose={() => setSuccessModalVisible(false)}
+        />
+      )}
     </div>
   );
 }
