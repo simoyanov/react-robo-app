@@ -1,7 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import UpdateSuccessModal from "./UpdateSuccessModal"; // Импорт компонента UpdateSuccessModal
+import UpdateSuccessModal from "./UpdateSuccessModal";
+import {
+  Button,
+  TextField,
+  FormControl,
+  FormLabel,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  Checkbox,
+  Grid,
+  Typography,
+} from "@mui/material";
 
 function EditRecord() {
   const { id } = useParams();
@@ -53,59 +65,52 @@ function EditRecord() {
       )} */}
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       <form>
-        <div>
-          <label>Имя:</label>
-          <input
-            type="text"
+        <FormControl>
+          <TextField
+            fullWidth
+            label="Имя"
             name="name"
             value={record.name || ""}
             onChange={handleChange}
             required
           />
-        </div>
-        <div>
-          <label>Номер телефона:</label>
-          <input
-            type="text"
+          <TextField
+            fullWidth
+            label="Номер телефона"
             name="phone"
             value={record.phone || ""}
             onChange={handleChange}
             required
           />
-        </div>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
+          <TextField
+            fullWidth
+            label="Email"
             name="email"
+            type="email"
             value={record.email || ""}
             onChange={handleChange}
             required
           />
-        </div>
-        <div>
-          <label>Страна:</label>
-          <input
-            type="text"
+          <TextField
+            fullWidth
+            label="Страна"
             name="country"
             value={record.country || ""}
             onChange={handleChange}
             required
           />
-        </div>
-        <div>
-          <label>Штат:</label>
-          <input
-            type="text"
+          <TextField
+            fullWidth
+            label="Штат"
             name="state"
             value={record.state || ""}
             onChange={handleChange}
             required
           />
-        </div>
-        <button type="button" onClick={handleUpdate}>
-          Сохранить изменения
-        </button>
+          <Button variant="contained" color="primary" onClick={handleUpdate}>
+            Сохранить изменения
+          </Button>
+        </FormControl>
       </form>
       {successModalVisible && (
         <UpdateSuccessModal

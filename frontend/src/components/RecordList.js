@@ -68,55 +68,15 @@ function RecordList() {
   return (
     <div>
       <h2>Список записей</h2>
-      {/* <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Имя</TableCell>
-            <TableCell>Номер телефона</TableCell>
-            <TableCell>Email</TableCell>
-            <TableCell>Страна</TableCell>
-            <TableCell>Штат</TableCell>
-            <TableCell></TableCell>
-            <TableCell></TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {records.map((record) => (
-            <TableRow key={record.id}>
-              <TableCell>{record.name}</TableCell>
-              <TableCell>{record.phone}</TableCell>
-              <TableCell>{record.email}</TableCell>
-              <TableCell>{record.country}</TableCell>
-              <TableCell>{record.state}</TableCell>
-              <TableCell>
-                <Link to={`/edit/${record.id}`}>
-                  <IconButton edge="end" aria-label="edit">
-                    <EditIcon />
-                  </IconButton>
-                </Link>
-              </TableCell>
-              <TableCell>
-                <IconButton
-                  edge="end"
-                  aria-label="delete"
-                  onClick={() => handleDelete(record)}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table> */}
       <div style={{ height: 400, width: "100%" }}>
         <DataGrid
           rows={records}
           columns={[
-            { field: "name", headerName: "Имя", width: 200 },
-            { field: "phone", headerName: "Номер телефона", width: 200 },
-            { field: "email", headerName: "Email", width: 250 },
-            { field: "country", headerName: "Страна", width: 250 },
-            { field: "state", headerName: "Штат", width: 250 },
+            { field: "name", headerName: "Имя", width: 150 },
+            { field: "phone", headerName: "Номер телефона", width: 150 },
+            { field: "email", headerName: "Email", width: 200 },
+            { field: "country", headerName: "Страна", width: 150 },
+            { field: "state", headerName: "Штат", width: 150 },
             {
               field: "actions",
               headerName: "Действия",

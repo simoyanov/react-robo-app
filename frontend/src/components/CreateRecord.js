@@ -2,6 +2,18 @@ import React, { useState } from "react";
 import axios from "axios";
 import SuccessModal from "./SuccessModal";
 import { Link } from "react-router-dom";
+import {
+  Button,
+  TextField,
+  FormControl,
+  FormLabel,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  Checkbox,
+  Grid,
+  Typography,
+} from "@mui/material";
 
 function CreateRecord() {
   const [formData, setFormData] = useState({
@@ -59,57 +71,54 @@ function CreateRecord() {
       )} */}
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       <form onSubmit={handleSubmit}>
-        <div>
-          <label>Имя:</label>
-          <input
-            type="text"
+        <FormControl>
+          <Typography variant="h6">Создать запись</Typography>
+          <TextField
+            label="Имя"
             name="name"
             value={formData.name}
             onChange={handleChange}
             required
+            // ...
           />
-        </div>
-        <div>
-          <label>Номер телефона:</label>
-          <input
-            type="text"
+
+          <TextField
+            label="Номер телефона"
             name="phone"
             value={formData.phone}
             onChange={handleChange}
             required
+            // ...
           />
-        </div>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
+          <TextField
+            label="Email"
             name="email"
             value={formData.email}
             onChange={handleChange}
             required
+            // ...
           />
-        </div>
-        <div>
-          <label>Страна:</label>
-          <input
-            type="text"
+          <TextField
+            label="Страна"
             name="country"
             value={formData.country}
             onChange={handleChange}
             required
+            // ...
           />
-        </div>
-        <div>
-          <label>Штат:</label>
-          <input
-            type="text"
+          <TextField
+            label="Штат"
             name="state"
             value={formData.state}
             onChange={handleChange}
             required
+            // ...
           />
-        </div>
-        <button type="submit">Создать запись</button>
+
+          <Button variant="contained" color="primary" onClick={handleSubmit}>
+            Создать
+          </Button>
+        </FormControl>
       </form>
       {successModalVisible && (
         <SuccessModal
