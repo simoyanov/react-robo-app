@@ -27,22 +27,35 @@ app.get("/api/records", (req, res) => {
 });
 
 app.post("/api/records", (req, res) => {
-  const { name, phone, email, country, state } = req.body;
+  const {
+    name,
+    phone,
+    email,
+    country,
+    state,
+    radioOption,
+    agreement,
+    newsletter,
+  } = req.body;
 
   const query = `
-      INSERT INTO records (name, phone, email, country, state)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO records (name, phone, email, country, state, radio_option, agreement, newsletter)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-  db.run(query, [name, phone, email, country, state], function (err) {
-    if (err) {
-      console.error("Ошибка при создании записи:", err.message);
-      res.status(500).json({ error: "Ошибка при создании записи" });
-    } else {
-      console.log(`Запись успешно создана с ID: ${this.lastID}`);
-      res.status(201).json({ message: "Запись успешно создана" });
+  db.run(
+    query,
+    [name, phone, email, country, state, radioOption, agreement, newsletter],
+    function (err) {
+      if (err) {
+        console.error("Ошибка при создании записи:", err.message);
+        res.status(500).json({ error: "Ошибка при создании записи" });
+      } else {
+        console.log(`Запись успешно создана с ID: ${this.lastID}`);
+        res.status(201).json({ message: "Запись успешно создана" });
+      }
     }
-  });
+  );
 });
 
 app.get("/api/records/:id", (req, res) => {
@@ -68,22 +81,45 @@ app.get("/api/records/:id", (req, res) => {
 
 app.put("/api/records/:id", (req, res) => {
   const recordId = req.params.id;
-  const { name, phone, email, country, state } = req.body;
+  const {
+    name,
+    phone,
+    email,
+    country,
+    state,
+    radioOption,
+    agreement,
+    newsletter,
+  } = req.body;
 
   const query = `
       UPDATE records
-      SET name = ?, phone = ?, email = ?, country = ?, state = ?
+      SET name = ?, phone = ?, email = ?, country = ?, state = ?,radio_option = ?, agreement = ?, newsletter = ?
       WHERE id = ?
     `;
 
-  db.run(query, [name, phone, email, country, state, recordId], (err) => {
-    if (err) {
-      console.error("Ошибка при обновлении записи:", err.message);
-      res.status(500).json({ error: "Ошибка при обновлении записи" });
-    } else {
-      res.status(200).json({ message: "Запись успешно обновлена" });
+  db.run(
+    query,
+    [
+      name,
+      phone,
+      email,
+      country,
+      state,
+      radioOption,
+      agreement,
+      newsletter,
+      recordId,
+    ],
+    (err) => {
+      if (err) {
+        console.error("Ошибка при обновлении записи:", err.message);
+        res.status(500).json({ error: "Ошибка при обновлении записи" });
+      } else {
+        res.status(200).json({ message: "Запись успешно обновлена" });
+      }
     }
-  });
+  );
 });
 
 app.delete("/api/records/:id", (req, res) => {

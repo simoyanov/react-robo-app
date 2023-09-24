@@ -18,12 +18,7 @@ import {
   MenuItem,
   Autocomplete,
 } from "@mui/material";
-import {
-  nameValidationSchema,
-  emailSchema,
-  emailConfirmSchema,
-  phoneSchema,
-} from "../validation";
+import { objectSchema } from "../validation";
 import InputMask from "react-input-mask";
 import { Country, State } from "country-state-city";
 
@@ -80,138 +75,83 @@ function CreateRecord() {
     } else {
       setIsStateDisabled(true);
     }
+
+    setFormData({
+      ...formData,
+      country: value ? value.name : "",
+    });
   };
 
   const handleStateChange = (event) => {
+    console.log("event.target.value", event.target.value);
     setSelectedState(event.target.value);
+    setFormData({
+      ...formData,
+      state: event.target.value ? event.target.value : "",
+    });
   };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    if (type === "checkbox") {
-      setFormData({
-        ...formData,
-        [name]: checked,
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
-    }
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: type === "checkbox" ? checked : value,
+    }));
 
     if (name === "name") {
-      const nameValidationResult = nameValidationSchema.validate(value);
-      if (nameValidationResult.error) {
-        setErrors({
-          ...errors,
-          name: nameValidationResult.error.details[0].message,
-        });
-        setFormValid(false);
-      } else {
-        setErrors({
-          ...errors,
-          name: "",
-        });
-      }
+      const { error } = objectSchema.name.validate(value);
+      console.log("value name", value);
+      setErrors({
+        ...errors,
+        [name]: error ? error.message : "",
+      });
     }
 
     if (name === "phone") {
-      const { error } = phoneSchema.validate(value);
+      const { error } = objectSchema.phone.validate(value);
       setErrors({
         ...errors,
-        [name]: error ? error.message : undefined,
+        [name]: error ? error.message : "",
       });
     }
 
     if (name === "email") {
-      const emailValidation = emailSchema.validate(value);
-
+      const { error } = objectSchema.email.validate(value);
       setErrors({
         ...errors,
-        [name]: emailValidation.error
-          ? emailValidation.error.message
-          : undefined,
+        [name]: error ? error.message : "",
       });
     }
 
     if (name === "emailConfirm") {
-      const emailConfirmValidation = emailConfirmSchema.validate(value, {
-        context: { email: formData.email },
-      });
-
+      const { error } = objectSchema.emailConfirm.validate(value);
       setErrors({
         ...errors,
-        emailConfirm: emailConfirmValidation.error
-          ? emailConfirmValidation.error.message
-          : undefined,
+        [name]: error
+          ? error.message
+          : value !== formData.email
+          ? "Email не совпадает"
+          : "",
       });
     }
   };
 
+  useEffect(() => {
+    const isFormValid =
+      !errors.name &&
+      !errors.phone &&
+      !errors.email &&
+      !errors.emailConfirm &&
+      formData.radioOption &&
+      (formData.radioOption !== "license" || formData.agreement);
+
+    setFormValid(isFormValid);
+  }, [formData]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    const validationErrors = {};
-
-    if (!formData.name) {
-      validationErrors.name = "Обязательное поле";
-    }
-
-    if (!formData.phone) {
-      validationErrors.phone = "Обязательное поле";
-    } else if (!/^\+/.test(formData.phone)) {
-      validationErrors.phone = "Номер телефона должен начинаться с +";
-    }
-    if (!formData.email) {
-      validationErrors.email = "Обязательное поле";
-    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      validationErrors.email = "Неверный формат email";
-    }
-    if (formData.email !== formData.emailConfirm) {
-      validationErrors.emailConfirm = "Email не совпадает";
-    }
-    if (!formData.country) {
-      validationErrors.country = "Обязательное поле";
-    }
-    if (!formData.state) {
-      validationErrors.state = "Обязательное поле";
-    }
-
-    if (!formData.radioOption) {
-      validationErrors.radioOption = "Выберите опцию";
-    }
-
-    if (formData.radioOption === "license") {
-      if (!formData.agreement) {
-        validationErrors.agreement = "Обязательное согласие";
-      }
-    }
-
-    const nameValidationResult = nameValidationSchema.validate(formData.name);
-    if (nameValidationResult.error) {
-      validationErrors.name = nameValidationResult.error.details[0].message;
-    }
-
-    const emailValidation = emailSchema.validate(formData.email);
-    const emailConfirmValidation = emailConfirmSchema.validate(
-      formData.emailConfirm
-    );
-
-    if (emailValidation.error) {
-      validationErrors.email = emailValidation.error.message;
-    }
-
-    if (emailConfirmValidation.error) {
-      validationErrors.emailConfirm = emailConfirmValidation.error.message;
-    }
-
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      setFormValid(false);
-      return;
-    }
-
+    console.log("formData post", formData);
     axios
       .post("/api/records", formData)
       .then((response) => {
@@ -241,9 +181,6 @@ function CreateRecord() {
   return (
     <div>
       <h2>Создание записи</h2>
-      {/* {successMessage && (
-        <div className="success-message">{successMessage}</div>
-      )} */}
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       <form onSubmit={handleSubmit}>
         <Typography variant="h6">Создать запись</Typography>
@@ -262,16 +199,20 @@ function CreateRecord() {
         </FormControl>
         <FormControl>
           <InputMask
-            fullWidth
-            name="phone"
             value={formData.phone}
             onChange={handleChange}
-            required
-            error={Boolean(errors.phone)}
-            helperText={errors.phone}
             mask="+7 999 999 99 99"
           >
-            {() => <TextField label="Номер телефона" required />}
+            {() => (
+              <TextField
+                label="Номер телефона"
+                required
+                fullWidth
+                name="phone"
+                error={Boolean(errors.phone)}
+                helperText={errors.phone}
+              />
+            )}
           </InputMask>
         </FormControl>
         <FormControl>
@@ -307,9 +248,7 @@ function CreateRecord() {
             getOptionLabel={(option) => option.name}
             value={selectedCountry}
             onChange={handleCountryChange}
-            renderInput={(params) => (
-              <TextField {...params} label="Страна" required />
-            )}
+            renderInput={(params) => <TextField {...params} label="Страна" />}
           />
         </FormControl>
         <FormControl>
@@ -317,8 +256,7 @@ function CreateRecord() {
           <Select
             name="state"
             value={selectedState}
-            onChange={(e) => setSelectedState(e.target.value)}
-            required
+            onChange={handleStateChange}
             disabled={isStateDisabled}
           >
             {states.map((state) => (
@@ -329,12 +267,13 @@ function CreateRecord() {
           </Select>
         </FormControl>
 
-        <FormControl component="fieldset" error={Boolean(errors.radioOption)}>
+        <FormControl component="fieldset">
           <RadioGroup
             name="radioOption"
             value={formData.radioOption}
             onChange={handleChange}
             row
+            error={Boolean(errors.radioOption)}
           >
             <FormControlLabel
               value="license"
@@ -356,6 +295,7 @@ function CreateRecord() {
                       name="agreement"
                       checked={formData.agreement}
                       onChange={handleChange}
+                      required
                     />
                   }
                   label="Принимаю условия лицензионного соглашения"
