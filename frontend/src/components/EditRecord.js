@@ -20,10 +20,11 @@ import {
 import { objectSchema } from "../validation";
 import InputMask from "react-input-mask";
 import { Country, State } from "country-state-city";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 function EditRecord({ match }) {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -187,6 +188,7 @@ function EditRecord({ match }) {
       .then((response) => {
         showSuccessModal("Запись успешно изменена.");
         setErrorMessage("");
+        navigate("/", { state: { editedRecordId: id } });
       })
       .catch((error) => {
         setErrorMessage("Ошибка при изменении записи.");

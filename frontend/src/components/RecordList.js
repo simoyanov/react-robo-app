@@ -1,19 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import axios from "axios";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  IconButton,
-} from "@mui/material";
-import { DataGrid, GridColDef, GridValueGetterParams } from "@mui/x-data-grid";
+import { IconButton } from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
 import { Delete as DeleteIcon, Edit as EditIcon } from "@mui/icons-material"; // Импорт иконки Material-UI
 
 function RecordList() {
+  const location = useLocation();
+  const [editedRecordId, setEditedRecordId] = useState(null);
   const [records, setRecords] = useState([]);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState(null);
@@ -23,13 +18,22 @@ function RecordList() {
       .get("/api/records")
       .then((response) => {
         setRecords(response.data);
-        console.log(response.data);
       })
       .catch((error) => {
         console.error("Ошибка при получении данных:", error);
       });
   }, []);
 
+  useEffect(() => {
+    const { editedRecordId } = location.state || {};
+    if (editedRecordId) {
+      setEditedRecordId(editedRecordId);
+    }
+  }, [location.state]);
+
+  const isRecordEdited = (record) => {
+    return record.id === editedRecordId;
+  };
   const updateRecordList = () => {
     axios.get("/api/records").then((response) => {
       setRecords(response.data);
@@ -61,10 +65,6 @@ function RecordList() {
     setDeleteModalVisible(false);
   };
 
-  const columns = [
-    { field: "firstName", headerName: "First name", width: 130 },
-  ];
-
   return (
     <div>
       <h2>Список записей</h2>
@@ -75,11 +75,43 @@ function RecordList() {
             { field: "name", headerName: "Имя", width: 150 },
             { field: "phone", headerName: "Номер телефона", width: 150 },
             { field: "email", headerName: "Email", width: 200 },
-            { field: "country", headerName: "Страна", width: 150 },
-            { field: "state", headerName: "Штат", width: 150 },
+            {
+              field: "country",
+              headerName: "Страна",
+              width: 150,
+              sortable: true,
+              sortComparator: (country1, country2, param1, param2) => {
+                const direction = param1.api.getSortModel()[0].sort;
+
+                const state1 = param1.api.getCellValue(param1.id, "state");
+                const state2 = param2.api.getCellValue(param2.id, "state");
+
+                if (country1 && country2) {
+                  const countryComparison = country1.localeCompare(country2);
+                  if (countryComparison !== 0) {
+                    return countryComparison;
+                  }
+                }
+
+                if (state1 && state2) {
+                  return direction === "asc"
+                    ? state1.localeCompare(state2)
+                    : -state1.localeCompare(state2);
+                }
+
+                return 0;
+              },
+            },
+            {
+              field: "state",
+              headerName: "Штат",
+              width: 150,
+              sortable: true,
+            },
             {
               field: "actions",
               headerName: "Действия",
+              sortable: false,
               width: 150,
               renderCell: (params) => (
                 <div>
@@ -99,6 +131,9 @@ function RecordList() {
               ),
             },
           ]}
+          getRowClassName={(params) => {
+            return isRecordEdited(params.row) ? "edited-record" : "";
+          }}
         />
       </div>
       {deleteModalVisible && (
