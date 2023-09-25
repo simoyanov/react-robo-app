@@ -78,10 +78,10 @@ function EditRecord({ match }) {
           name: recordData.name,
           phone: recordData.phone,
           email: recordData.email,
-          emailConfirm: recordData.emailConfirm,
+          emailConfirm: recordData.email,
           country: recordData.country,
           state: recordData.state,
-          radioOption: recordData.radioOption,
+          radioOption: recordData.radio_option,
           agreement: recordData.agreement,
           newsletter: recordData.newsletter,
         });
@@ -90,6 +90,7 @@ function EditRecord({ match }) {
         );
         if (recordData.state) {
           setSelectedState(recordData.state);
+          setIsStateDisabled(false);
         }
       })
       .catch((error) => {
