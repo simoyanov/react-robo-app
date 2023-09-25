@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import SuccessModal from "./SuccessModal";
 import {
   Button,
   TextField,
@@ -16,6 +15,10 @@ import {
   Select,
   MenuItem,
   Autocomplete,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { objectSchema } from "../validation";
 import InputMask from "react-input-mask";
@@ -42,19 +45,12 @@ function EditRecord({ match }) {
   const [formValid, setFormValid] = useState(false);
 
   const [successModalVisible, setSuccessModalVisible] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [selectedState, setSelectedState] = useState("");
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
-  const [stateDisabled, setStateDisabled] = useState(true);
   const [isStateDisabled, setIsStateDisabled] = useState(true);
-
-  const showSuccessModal = (message) => {
-    setSuccessMessage(message);
-    setSuccessModalVisible(true);
-  };
 
   useEffect(() => {
     if (selectedCountry) {
@@ -95,7 +91,6 @@ function EditRecord({ match }) {
       })
       .catch((error) => {
         setErrorMessage("Ошибка при загрузке записи.");
-        setSuccessMessage("");
       });
   }, [id]);
 
@@ -115,7 +110,6 @@ function EditRecord({ match }) {
   };
 
   const handleStateChange = (event) => {
-    console.log("event.target.value", event.target.value);
     setSelectedState(event.target.value);
     setFormData({
       ...formData,
@@ -187,14 +181,21 @@ function EditRecord({ match }) {
     axios
       .put(`/api/records/${id}`, formData)
       .then((response) => {
-        showSuccessModal("Запись успешно изменена.");
+        handleSuccessModalOpen();
         setErrorMessage("");
-        navigate("/", { state: { editedRecordId: id } });
       })
       .catch((error) => {
         setErrorMessage("Ошибка при изменении записи.");
-        setSuccessMessage("");
       });
+  };
+
+  const handleSuccessModalOpen = () => {
+    setSuccessModalVisible(true);
+  };
+
+  const handleSuccessModalClose = () => {
+    setSuccessModalVisible(false);
+    navigate("/", { state: { editedRecordId: id } });
   };
 
   return (
@@ -363,14 +364,14 @@ function EditRecord({ match }) {
           Сохранить запись
         </Button>
       </form>
-      {successModalVisible && (
-        <SuccessModal
-          message={successMessage}
-          onClose={() => {
-            setSuccessModalVisible(false);
-          }}
-        />
-      )}
+      <Dialog open={successModalVisible} onClose={handleSuccessModalClose}>
+        <DialogTitle>Запись обновлена успешно</DialogTitle>
+        <DialogActions>
+          <Button onClick={handleSuccessModalClose} color="primary">
+            Закрыть
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

@@ -52,7 +52,9 @@ app.post("/api/records", (req, res) => {
         res.status(500).json({ error: "Ошибка при создании записи" });
       } else {
         console.log(`Запись успешно создана с ID: ${this.lastID}`);
-        res.status(201).json({ message: "Запись успешно создана" });
+        res
+          .status(201)
+          .json({ message: "Запись успешно создана", id: this.lastID });
       }
     }
   );

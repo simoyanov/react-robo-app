@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import SuccessModal from "./SuccessModal";
-import { Link } from "react-router-dom";
 import {
   Button,
   TextField,
@@ -17,12 +15,18 @@ import {
   Select,
   MenuItem,
   Autocomplete,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { objectSchema } from "../validation";
 import InputMask from "react-input-mask";
 import { Country, State } from "country-state-city";
+import { useNavigate } from "react-router-dom";
 
 function CreateRecord() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -39,18 +43,13 @@ function CreateRecord() {
   const [formValid, setFormValid] = useState(false);
 
   const [successModalVisible, setSuccessModalVisible] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [selectedState, setSelectedState] = useState("");
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
-  const [stateDisabled, setStateDisabled] = useState(true);
   const [isStateDisabled, setIsStateDisabled] = useState(true);
-  const showSuccessModal = (message) => {
-    setSuccessMessage(message);
-    setSuccessModalVisible(true);
-  };
+  const [createdRecordId, setCreatedRecordId] = useState(null);
 
   useEffect(() => {
     const allCountries = Country.getAllCountries();
@@ -83,7 +82,6 @@ function CreateRecord() {
   };
 
   const handleStateChange = (event) => {
-    console.log("event.target.value", event.target.value);
     setSelectedState(event.target.value);
     setFormData({
       ...formData,
@@ -101,7 +99,6 @@ function CreateRecord() {
 
     if (name === "name") {
       const { error } = objectSchema.name.validate(value);
-      console.log("value name", value);
       setErrors({
         ...errors,
         [name]: error ? error.message : "",
@@ -151,11 +148,11 @@ function CreateRecord() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("formData post", formData);
     axios
       .post("/api/records", formData)
       .then((response) => {
-        showSuccessModal("Запись успешно создана.");
+        setCreatedRecordId(response.data.id);
+        handleSuccessModalOpen();
         setErrorMessage("");
         setFormData({
           name: "",
@@ -168,14 +165,28 @@ function CreateRecord() {
           agreement: false,
           newsletter: false,
         });
-
+        setSelectedCountry(null);
+        setSelectedState("");
+        setIsStateDisabled(true);
         setErrors({});
         setFormValid(true);
       })
       .catch((error) => {
         setErrorMessage("Ошибка при создании записи.");
-        setSuccessMessage("");
       });
+  };
+
+  const handleSuccessModalOpen = () => {
+    setSuccessModalVisible(true);
+  };
+
+  const handleSuccessModalClose = () => {
+    setSuccessModalVisible(false);
+    setCreatedRecordId(null);
+  };
+
+  const handleSetCreatedRecord = () => {
+    navigate("/", { state: { editedRecordId: createdRecordId } });
   };
 
   return (
@@ -344,12 +355,17 @@ function CreateRecord() {
           Создать запись
         </Button>
       </form>
-      {successModalVisible && (
-        <SuccessModal
-          message={successMessage}
-          onClose={() => setSuccessModalVisible(false)}
-        />
-      )}
+      <Dialog open={successModalVisible} onClose={handleSuccessModalClose}>
+        <DialogTitle>Запись создана успешно</DialogTitle>
+        <DialogActions>
+          <Button onClick={handleSetCreatedRecord} color="primary">
+            Перейти к списку записей
+          </Button>
+          <Button onClick={handleSuccessModalClose} color="primary">
+            Закрыть
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

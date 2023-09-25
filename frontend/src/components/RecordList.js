@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import axios from "axios";
-import DeleteConfirmationModal from "./DeleteConfirmationModal";
-import { IconButton } from "@mui/material";
+import {
+  IconButton,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { Delete as DeleteIcon, Edit as EditIcon } from "@mui/icons-material"; // Импорт иконки Material-UI
 
@@ -144,13 +151,23 @@ function RecordList() {
           }}
         />
       </div>
-      {deleteModalVisible && (
-        <DeleteConfirmationModal
-          message={`Вы действительно хотите удалить запись "${recordToDelete.name}"?`}
-          onConfirm={confirmDelete}
-          onCancel={cancelDelete}
-        />
-      )}
+
+      <Dialog open={deleteModalVisible}>
+        <DialogTitle>Удаление записи</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Вы уверены, что хотите удалить эту запись?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={confirmDelete} color="primary">
+            Удалить
+          </Button>
+          <Button onClick={cancelDelete} color="primary">
+            Отмена
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
