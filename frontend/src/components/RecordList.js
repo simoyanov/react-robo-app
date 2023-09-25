@@ -108,6 +108,12 @@ function RecordList() {
               width: 150,
               sortable: true,
             },
+            { field: "created_date", headerName: "Дата создания", width: 200 },
+            {
+              field: "updated_date",
+              headerName: "Дата редактирования",
+              width: 200,
+            },
             {
               field: "actions",
               headerName: "Действия",
@@ -131,6 +137,8 @@ function RecordList() {
               ),
             },
           ]}
+          hideFooterPagination
+          hideFooterSelectedRowCount
           getRowClassName={(params) => {
             return isRecordEdited(params.row) ? "edited-record" : "";
           }}
