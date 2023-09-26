@@ -18,7 +18,7 @@ npm i
 Запуск сервера
 
 ```sh
-cd ../
+cd backend
 node server.js
 ```
 
