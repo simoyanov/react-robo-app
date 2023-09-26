@@ -27,16 +27,17 @@ import { useNavigate } from "react-router-dom";
 
 function CreateRecord() {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    emailConfirm: "",
-    country: "",
-    state: "",
-    radioOption: "",
-    agreement: false,
-    newsletter: false,
+    name: localStorage.getItem("name") || "",
+    phone: localStorage.getItem("phone") || "",
+    email: localStorage.getItem("email") || "",
+    emailConfirm: localStorage.getItem("emailConfirm") || "",
+    country: localStorage.getItem("country") || "",
+    state: localStorage.getItem("state") || "",
+    radioOption: localStorage.getItem("radioOption") || "",
+    agreement: localStorage.getItem("agreement") || false,
+    newsletter: localStorage.getItem("newsletter") || false,
   });
 
   const [errors, setErrors] = useState({});
@@ -54,6 +55,17 @@ function CreateRecord() {
   useEffect(() => {
     const allCountries = Country.getAllCountries();
     setCountries(allCountries);
+    const savedCountry = localStorage.getItem("country");
+    const savedState = localStorage.getItem("state");
+    if (savedCountry) {
+      setSelectedCountry(
+        allCountries.find((country) => country.name === savedCountry)
+      );
+      if (savedState) {
+        setIsStateDisabled(false);
+        setSelectedState(savedState);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -75,6 +87,7 @@ function CreateRecord() {
       setIsStateDisabled(true);
     }
 
+    localStorage.setItem("country", value.name);
     setFormData({
       ...formData,
       country: value ? value.name : "",
@@ -83,6 +96,8 @@ function CreateRecord() {
 
   const handleStateChange = (event) => {
     setSelectedState(event.target.value);
+    localStorage.setItem("state", event.target.value);
+
     setFormData({
       ...formData,
       state: event.target.value ? event.target.value : "",
@@ -91,6 +106,8 @@ function CreateRecord() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
+    localStorage.setItem(name, value);
 
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -154,6 +171,15 @@ function CreateRecord() {
         setCreatedRecordId(response.data.id);
         handleSuccessModalOpen();
         setErrorMessage("");
+        localStorage.removeItem("name");
+        localStorage.removeItem("phone");
+        localStorage.removeItem("email");
+        localStorage.removeItem("emailConfirm");
+        localStorage.removeItem("country");
+        localStorage.removeItem("state");
+        localStorage.removeItem("radioOption");
+        localStorage.removeItem("agreement");
+        localStorage.removeItem("newsletter");
         setFormData({
           name: "",
           phone: "",
