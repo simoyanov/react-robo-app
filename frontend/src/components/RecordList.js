@@ -9,9 +9,14 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Box,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import { Delete as DeleteIcon, Edit as EditIcon } from "@mui/icons-material"; // Импорт иконки Material-UI
+import {
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Create,
+} from "@mui/icons-material";
 
 function RecordList() {
   const location = useLocation();
@@ -39,7 +44,7 @@ function RecordList() {
   }, [location.state]);
 
   const isRecordEdited = (record) => {
-    return record.id === editedRecordId;
+    return record.id == editedRecordId;
   };
   const updateRecordList = () => {
     axios.get("/api/records").then((response) => {
@@ -74,14 +79,34 @@ function RecordList() {
 
   return (
     <div>
-      <h2>Список записей</h2>
-      <div style={{ height: 400, width: "100%" }}>
+      <Box
+        sx={{
+          marginTop: 3,
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <h2>Список записей</h2>
+        <Button
+          variant="outlined"
+          color="primary"
+          startIcon={<Create />}
+          component={Link}
+          to="/create"
+        >
+          Создать запись
+        </Button>
+      </Box>
+
+      <div style={{ width: "100%", mb: 2 }}>
         <DataGrid
           rows={records}
           columns={[
-            { field: "name", headerName: "Имя", width: 150 },
+            { field: "name", headerName: "Имя", width: 100 },
             { field: "phone", headerName: "Номер телефона", width: 150 },
-            { field: "email", headerName: "Email", width: 200 },
+            { field: "email", headerName: "Email", width: 150 },
             {
               field: "country",
               headerName: "Страна",
@@ -115,17 +140,18 @@ function RecordList() {
               width: 150,
               sortable: true,
             },
-            { field: "created_date", headerName: "Дата создания", width: 200 },
+            { field: "created_date", headerName: "Дата создания", width: 170 },
             {
               field: "updated_date",
               headerName: "Дата редактирования",
-              width: 200,
+              width: 170,
             },
             {
               field: "actions",
-              headerName: "Действия",
+              headerName: "",
               sortable: false,
-              width: 150,
+              disableColumnMenu: true,
+              disableColumnFilter: true,
               renderCell: (params) => (
                 <div>
                   <Link to={`/edit/${params.row.id}`}>
@@ -147,7 +173,7 @@ function RecordList() {
           hideFooterPagination
           hideFooterSelectedRowCount
           getRowClassName={(params) => {
-            return isRecordEdited(params.row) ? "edited-record" : "";
+            return isRecordEdited(params.row) ? "Mui-selected" : "";
           }}
         />
       </div>

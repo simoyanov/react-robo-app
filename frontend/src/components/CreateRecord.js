@@ -5,7 +5,6 @@ import {
   TextField,
   FormControl,
   FormGroup,
-  FormLabel,
   Radio,
   RadioGroup,
   FormControlLabel,
@@ -17,13 +16,16 @@ import {
   Autocomplete,
   Dialog,
   DialogTitle,
-  DialogContent,
   DialogActions,
+  Box,
+  Grid,
 } from "@mui/material";
+import { List } from "@mui/icons-material";
+
 import { objectSchema } from "../validation";
 import InputMask from "react-input-mask";
 import { Country, State } from "country-state-city";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 function CreateRecord() {
   const navigate = useNavigate();
@@ -51,6 +53,7 @@ function CreateRecord() {
   const [states, setStates] = useState([]);
   const [isStateDisabled, setIsStateDisabled] = useState(true);
   const [createdRecordId, setCreatedRecordId] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const allCountries = Country.getAllCountries();
@@ -165,11 +168,17 @@ function CreateRecord() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (isSubmitting) {
+      return;
+    }
+    setIsSubmitting(true);
+
     axios
       .post("/api/records", formData)
       .then((response) => {
         setCreatedRecordId(response.data.id);
         handleSuccessModalOpen();
+        setIsSubmitting(false);
         setErrorMessage("");
         localStorage.removeItem("name");
         localStorage.removeItem("phone");
@@ -199,6 +208,7 @@ function CreateRecord() {
       })
       .catch((error) => {
         setErrorMessage("Ошибка при создании записи.");
+        setIsSubmitting(false);
       });
   };
 
@@ -216,171 +226,213 @@ function CreateRecord() {
   };
 
   return (
-    <div>
-      <h2>Создание записи</h2>
-      {errorMessage && <div className="error-message">{errorMessage}</div>}
-      <form onSubmit={handleSubmit}>
-        <Typography variant="h6">Создать запись</Typography>
-
-        <FormControl>
-          <TextField
-            fullWidth
-            label="Имя"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            error={Boolean(errors.name)}
-            helperText={errors.name}
-          />
-        </FormControl>
-        <FormControl>
-          <InputMask
-            value={formData.phone}
-            onChange={handleChange}
-            mask="+7 999 999 99 99"
-          >
-            {() => (
-              <TextField
-                label="Номер телефона"
-                required
-                fullWidth
-                name="phone"
-                error={Boolean(errors.phone)}
-                helperText={errors.phone}
-              />
-            )}
-          </InputMask>
-        </FormControl>
-        <FormControl>
-          <TextField
-            fullWidth
-            label="Email"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            error={Boolean(errors.email)}
-            helperText={errors.email}
-          />
-        </FormControl>
-        <FormControl>
-          <TextField
-            fullWidth
-            label="Email confirm"
-            name="emailConfirm"
-            type="email"
-            value={formData.emailConfirm}
-            onChange={handleChange}
-            required
-            error={Boolean(errors.emailConfirm)}
-            helperText={errors.emailConfirm}
-            disabled={!formData.email}
-          />
-        </FormControl>
-        <FormControl>
-          <Autocomplete
-            options={Country.getAllCountries()}
-            getOptionLabel={(option) => option.name}
-            value={selectedCountry}
-            onChange={handleCountryChange}
-            renderInput={(params) => <TextField {...params} label="Страна" />}
-          />
-        </FormControl>
-        <FormControl>
-          <InputLabel>Штат</InputLabel>
-          <Select
-            name="state"
-            value={selectedState}
-            onChange={handleStateChange}
-            disabled={isStateDisabled}
-          >
-            {states.map((state) => (
-              <MenuItem key={state.name} value={state.name}>
-                {state.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl component="fieldset">
-          <RadioGroup
-            name="radioOption"
-            value={formData.radioOption}
-            onChange={handleChange}
-            row
-            error={Boolean(errors.radioOption)}
-          >
-            <FormControlLabel
-              value="license"
-              control={<Radio />}
-              label="По лицензионному соглашению"
-            />
-            <FormControlLabel
-              value="mutual"
-              control={<Radio />}
-              label="По обоюдному согласию"
-            />
-          </RadioGroup>
-          <div>
-            {formData.radioOption === "license" && (
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="agreement"
-                      checked={formData.agreement}
-                      onChange={handleChange}
-                      required
-                    />
-                  }
-                  label="Принимаю условия лицензионного соглашения"
-                  error={Boolean(errors.agreement)}
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="newsletter"
-                      checked={formData.newsletter}
-                      onChange={handleChange}
-                    />
-                  }
-                  label="Отправлять мне новости по email"
-                />
-              </FormGroup>
-            )}
-            {formData.radioOption === "mutual" && (
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="newsletter"
-                      checked={formData.newsletter}
-                      onChange={handleChange}
-                    />
-                  }
-                  label="Отправлять мне новости по email"
-                />
-              </FormGroup>
-            )}
-          </div>
-          {errors.radioOption && (
-            <Typography variant="body2" color="error">
-              {errors.radioOption}
-            </Typography>
-          )}
-        </FormControl>
-        <Button
-          variant="contained"
-          color="primary"
-          type="submit"
-          fullWidth
-          disabled={!formValid}
+    <Box
+      sx={{
+        marginTop: 6,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
+      <Box
+        component="form"
+        noValidate
+        onSubmit={handleSubmit}
+        sx={{ mt: 3, maxWidth: 800, p: 4, boxShadow: 4, borderRadius: 2 }}
+      >
+        {errorMessage && <div className="error-message">{errorMessage}</div>}
+        <Typography
+          sx={{
+            marginTop: 2,
+            marginBottom: 2,
+          }}
+          variant="h6"
         >
           Создать запись
-        </Button>
-      </form>
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Имя"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              error={Boolean(errors.name)}
+              helperText={errors.name}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <InputMask
+              value={formData.phone}
+              onChange={handleChange}
+              mask="+7 999 999 99 99"
+            >
+              {() => (
+                <TextField
+                  label="Номер телефона"
+                  required
+                  fullWidth
+                  name="phone"
+                  error={Boolean(errors.phone)}
+                  helperText={errors.phone}
+                />
+              )}
+            </InputMask>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              error={Boolean(errors.email)}
+              helperText={errors.email}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Email confirm"
+              name="emailConfirm"
+              type="email"
+              value={formData.emailConfirm}
+              onChange={handleChange}
+              required
+              error={Boolean(errors.emailConfirm)}
+              helperText={errors.emailConfirm}
+              disabled={!formData.email}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <Autocomplete
+              options={Country.getAllCountries()}
+              getOptionLabel={(option) => option.name}
+              value={selectedCountry}
+              onChange={handleCountryChange}
+              renderInput={(params) => <TextField {...params} label="Страна" />}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <InputLabel>Штат</InputLabel>
+              <Select
+                label="Штат"
+                name="state"
+                value={selectedState}
+                onChange={handleStateChange}
+                disabled={isStateDisabled}
+              >
+                {states.map((state) => (
+                  <MenuItem key={state.name} value={state.name}>
+                    {state.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12}>
+            <FormControl component="fieldset">
+              <RadioGroup
+                name="radioOption"
+                value={formData.radioOption}
+                onChange={handleChange}
+                row
+                error={Boolean(errors.radioOption)}
+              >
+                <FormControlLabel
+                  value="license"
+                  control={<Radio />}
+                  label="По лицензионному соглашению"
+                />
+                <FormControlLabel
+                  value="mutual"
+                  control={<Radio />}
+                  label="По обоюдному согласию"
+                />
+              </RadioGroup>
+              <div>
+                {formData.radioOption === "license" && (
+                  <FormGroup>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="agreement"
+                          checked={formData.agreement}
+                          onChange={handleChange}
+                          required
+                        />
+                      }
+                      label="Принимаю условия лицензионного соглашения"
+                      error={Boolean(errors.agreement)}
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="newsletter"
+                          checked={formData.newsletter}
+                          onChange={handleChange}
+                        />
+                      }
+                      label="Отправлять мне новости по email"
+                    />
+                  </FormGroup>
+                )}
+                {formData.radioOption === "mutual" && (
+                  <FormGroup>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="newsletter"
+                          checked={formData.newsletter}
+                          onChange={handleChange}
+                        />
+                      }
+                      label="Отправлять мне новости по email"
+                    />
+                  </FormGroup>
+                )}
+              </div>
+              {errors.radioOption && (
+                <Typography variant="body2" color="error">
+                  {errors.radioOption}
+                </Typography>
+              )}
+            </FormControl>
+          </Grid>
+        </Grid>
+        <Box
+          sx={{
+            marginTop: 3,
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            type="submit"
+            disabled={!formValid || isSubmitting}
+          >
+            Создать запись
+          </Button>
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<List />}
+            component={Link}
+            to="/"
+          >
+            Список записей
+          </Button>
+        </Box>
+      </Box>
       <Dialog open={successModalVisible} onClose={handleSuccessModalClose}>
         <DialogTitle>Запись создана успешно</DialogTitle>
         <DialogActions>
@@ -392,7 +444,7 @@ function CreateRecord() {
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </Box>
   );
 }
 
